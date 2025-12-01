@@ -13,15 +13,19 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Stack,
   Pagination,
   CircularProgress,
   Container,
   Paper,
   InputAdornment,
+  Stack,
+  Chip,
+  Divider
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import WhatshotIcon from '@mui/icons-material/Whatshot';
 import { useNotify } from "../context/NotificationContext";
 import { useNavigate } from "react-router-dom";
 
@@ -41,6 +45,9 @@ export default function ProductList() {
   const [direction, setDirection] = useState("asc");
   const [loading, setLoading] = useState(false);
 
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+
+  // 1. 抓取一般商品
   const fetchProducts = async () => {
     try {
       setLoading(true);
@@ -72,8 +79,29 @@ export default function ProductList() {
     }
   };
 
+  // ★ 2. 隨機抓取 3 本推薦書
+  const fetchFeatured = async () => {
+    try {
+      // 先抓取前 20 筆 (或者更多)，然後在前端隨機挑 3 筆
+      const res = await axios.get("/products/filter", {
+        params: { page: 0, size: 20 } 
+      });
+      
+      const all = res.data.data?.content || [];
+      if (all.length > 0) {
+        // 隨機洗牌演算法 (Fisher-Yates Shuffle)
+        const shuffled = [...all].sort(() => 0.5 - Math.random());
+        // 取前 3 個
+        setFeaturedProducts(shuffled.slice(0, 3));
+      }
+    } catch (err) {
+      console.error("無法取得推薦商品");
+    }
+  };
+
   useEffect(() => {
     fetchCategories();
+    fetchFeatured();
   }, []);
 
   useEffect(() => {
@@ -101,7 +129,6 @@ export default function ProductList() {
 
   return (
     <Box sx={{ bgcolor: "#f5f5f5", minHeight: "100vh", pb: 5 }}>
-      {/* 1. Hero Banner */}
       <Box
         sx={{
           height: 300,
@@ -123,7 +150,105 @@ export default function ProductList() {
       </Box>
 
       <Container maxWidth="lg">
-        {/* 2. 搜尋與篩選區塊 */}
+        
+        {/* ★ 3. 店長推薦區塊 (樣式修正：跟下方列表一致，只加標籤) */}
+        {featuredProducts.length > 0 && (
+          <Box sx={{ mb: 6 }}>
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+              <WhatshotIcon color="error" fontSize="large" sx={{ transform: 'translateY(3px)' }} />
+              <Typography variant="h4" fontWeight="bold" color="#333" sx={{ lineHeight: 1 }}>
+                店長強力推薦
+              </Typography>
+            </Stack>
+            
+            <Grid container spacing={3}>
+              {featuredProducts.map((p) => (
+                <Grid item xs={12} sm={6} md={4} key={p.id}>
+                  <Card
+                    sx={{
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      transition: "transform 0.2s",
+                      "&:hover": { transform: "scale(1.02)", boxShadow: 6 },
+                      borderRadius: 2,
+                      cursor: "pointer",
+                      position: "relative", // 讓標籤可以定位
+                      overflow: "hidden"    // 避免標籤跑出去
+                    }}
+                    onClick={() => navigate(`/product/${p.id}`)}
+                  >
+                    {/* ★ 右上角紅色標籤 */}
+                    <Chip 
+                      label="Featured" 
+                      color="error" 
+                      size="small" 
+                      icon={<AutoAwesomeIcon />}
+                      sx={{ 
+                        position: "absolute", 
+                        top: 12, 
+                        right: 12, 
+                        zIndex: 2, 
+                        fontWeight: "bold",
+                        boxShadow: 2
+                      }} 
+                    />
+
+                    <Box sx={{ pt: 2, px: 2, textAlign: "center", bgcolor: "#fafafa" }}>
+                      <CardMedia
+                        component="img"
+                        image={p.imageUrl || "/images/book.jpg"}
+                        alt={p.name}
+                        sx={{
+                          height: 200,
+                          objectFit: "contain",
+                          borderRadius: 1,
+                        }}
+                      />
+                    </Box>
+                    <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+                      <Typography gutterBottom variant="subtitle2" color="text.secondary">
+                        {p.category}
+                      </Typography>
+                      <Typography variant="h6" component="div" sx={{ 
+                          overflow: "hidden", 
+                          textOverflow: "ellipsis", 
+                          display: "-webkit-box", 
+                          WebkitLineClamp: 2, 
+                          WebkitBoxOrient: "vertical",
+                          minHeight: 50
+                        }}>
+                        {p.name}
+                      </Typography>
+                      
+                      <Box sx={{ mt: "auto", pt: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Typography variant="h6" color="primary" fontWeight="bold">
+                          NT$ {p.price}
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          startIcon={<ShoppingCartIcon />}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddToCart(p.id);
+                          }}
+                          disabled={p.stock <= 0}
+                          sx={{ borderRadius: 5 }}
+                        >
+                          {p.stock > 0 ? "購買" : "缺貨"}
+                        </Button>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+            <Divider sx={{ mt: 5, mb: 3 }} />
+          </Box>
+        )}
+
+        {/* 一般商品列表 (保持不變) */}
         <Paper elevation={0} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={4}>
@@ -147,7 +272,7 @@ export default function ProductList() {
               <FormControl fullWidth size="small" sx={{ minWidth: 140 }}>
                 <InputLabel id="category-label">書籍分類</InputLabel>
                 <Select
-                  labelId="category-label" // 確保 label 與選單連結
+                  labelId="category-label"
                   value={category}
                   label="書籍分類"
                   onChange={(e) => {
@@ -162,7 +287,6 @@ export default function ProductList() {
                 </Select>
               </FormControl>
             </Grid>
-
             <Grid item xs={6} md={3}>
               <FormControl fullWidth size="small" sx={{ minWidth: 120 }}>
                 <InputLabel id="sort-label">排序方式</InputLabel>
@@ -186,14 +310,12 @@ export default function ProductList() {
           </Grid>
         </Paper>
 
-        {/* 3. 載入動畫 */}
         {loading && (
           <Box sx={{ textAlign: "center", mt: 4 }}>
             <CircularProgress />
           </Box>
         )}
 
-        {/* 4. 商品列表 */}
         {!loading && (
           <Grid container spacing={3}>
             {products.map((p) => (
@@ -209,7 +331,7 @@ export default function ProductList() {
                       boxShadow: 6,
                     },
                     borderRadius: 2,
-                    cursor: "pointer" // 讓整張卡片看起來可點擊
+                    cursor: "pointer"
                   }}
                   onClick={() => navigate(`/product/${p.id}`)}
                 >
@@ -220,7 +342,7 @@ export default function ProductList() {
                       alt={p.name}
                       sx={{
                         height: 200,
-                        objectFit: "contain", // 書籍通常用 contain 比較好看，不會被切到
+                        objectFit: "contain",
                         borderRadius: 1,
                       }}
                     />
@@ -229,17 +351,17 @@ export default function ProductList() {
                     <Typography gutterBottom variant="subtitle2" color="text.secondary">
                       {p.category}
                     </Typography>
-                    <Typography variant="h6" component="div" sx={{
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      minHeight: 50
-                    }}>
+                    <Typography variant="h6" component="div" sx={{ 
+                        overflow: "hidden", 
+                        textOverflow: "ellipsis", 
+                        display: "-webkit-box", 
+                        WebkitLineClamp: 2, 
+                        WebkitBoxOrient: "vertical",
+                        minHeight: 50
+                      }}>
                       {p.name}
                     </Typography>
-
+                    
                     <Box sx={{ mt: "auto", pt: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Typography variant="h6" color="primary" fontWeight="bold">
                         NT$ {p.price}
@@ -249,7 +371,7 @@ export default function ProductList() {
                         size="small"
                         startIcon={<ShoppingCartIcon />}
                         onClick={(e) => {
-                          e.stopPropagation(); // 防止觸發 Card 的 onClick 跳轉
+                          e.stopPropagation();
                           handleAddToCart(p.id);
                         }}
                         disabled={p.stock <= 0}
@@ -265,7 +387,6 @@ export default function ProductList() {
           </Grid>
         )}
 
-        {/* 5. 分頁 */}
         <Box sx={{ mt: 5, display: "flex", justifyContent: "center" }}>
           <Pagination
             count={totalPages}
@@ -273,7 +394,7 @@ export default function ProductList() {
             onChange={(_, value) => setPage(value)}
             color="primary"
             size="large"
-            showFirstButton
+            showFirstButton 
             showLastButton
           />
         </Box>
