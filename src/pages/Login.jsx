@@ -1,12 +1,22 @@
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useNotify } from "../context/NotificationContext";
 import { useAuth } from "../context/AuthContext";
+import {
+  Container,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  Box,
+  Divider,
+} from "@mui/material";
+import LoginIcon from "@mui/icons-material/Login";
 
 export default function Login() {
   const notify = useNotify();
-  const { login } = useAuth(); // 設定全域登入狀態
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
@@ -19,16 +29,10 @@ export default function Login() {
     }
 
     try {
-      const res = await axios.post(
-        "/auth/login",
-        { username, password },
-        { withCredentials: true }
-      );
-
-      login(res.data.data); // ⬅ 設定全域登入狀態
+      const res = await axios.post("/auth/login", { username, password });
+      login(res.data.data);
       notify.show("登入成功！歡迎回來 😄", "success");
-
-      navigate("/"); // 導回首頁
+      navigate("/");
     } catch (err) {
       const msg = err.response?.data?.message || "登入失敗";
       notify.show(msg, "error");
@@ -36,25 +40,56 @@ export default function Login() {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>登入</h2>
-
-      <input
-        placeholder="帳號"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      /><br />
-
-      <input
-        type="password"
-        placeholder="密碼"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      /><br />
-
-      <button onClick={handleLogin}>
-        登入
-      </button>
-    </div>
+    <Container component="main" maxWidth="xs" sx={{ mt: 10 }}>
+      <Paper elevation={6} sx={{ p: 4, display: "flex", flexDirection: "column", alignItems: "center", borderRadius: 3 }}>
+        <Box sx={{ bgcolor: "primary.main", p: 1, borderRadius: "50%", mb: 1 }}>
+          <LoginIcon sx={{ color: "white" }} />
+        </Box>
+        <Typography component="h1" variant="h5" fontWeight="bold">
+          會員登入
+        </Typography>
+        
+        <Box component="form" noValidate sx={{ mt: 3, width: "100%" }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            label="帳號"
+            autoFocus
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            label="密碼"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+          />
+          <Button
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2, height: 48, fontSize: "1.1rem" }}
+            onClick={handleLogin}
+          >
+            登入
+          </Button>
+          
+          <Divider sx={{ my: 2 }}>或</Divider>
+          
+          <Button
+            fullWidth
+            variant="outlined"
+            component={Link}
+            to="/register"
+          >
+            註冊新帳號
+          </Button>
+        </Box>
+      </Paper>
+    </Container>
   );
 }

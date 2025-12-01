@@ -1,39 +1,122 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  Badge,
+  IconButton,
+  Menu,
+  MenuItem,
+  Container,
+} from "@mui/material";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import PersonIcon from "@mui/icons-material/Person";
+import StorefrontIcon from "@mui/icons-material/Storefront";
+import LogoutIcon from "@mui/icons-material/Logout";
+import SettingsIcon from "@mui/icons-material/Settings";
+import LoginIcon from "@mui/icons-material/Login";
+import { useState } from "react";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleMenu = (event) => setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
+
+  const handleLogout = () => {
+    handleClose();
+    logout();
+    navigate("/login");
+  };
 
   return (
-    <nav
-      style={{
-        padding: "10px 20px",
-        background: "#eee",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        zIndex: 999,
-        display: "flex",
-        gap: "10px",
-        alignItems: "center",
-      }}
-    >
-      <Link to="/products">商品列表</Link>
+    <AppBar position="fixed" sx={{ bgcolor: "#2c3e50", boxShadow: 3 }}>
+      <Container maxWidth="lg">
+        <Toolbar disableGutters>
+          {/* LOGO */}
+          <StorefrontIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
+          <Typography
+            variant="h6"
+            noWrap
+            component={Link}
+            to="/"
+            sx={{
+              mr: 2,
+              display: { xs: "none", md: "flex" },
+              fontFamily: "monospace",
+              fontWeight: 700,
+              letterSpacing: ".1rem",
+              color: "inherit",
+              textDecoration: "none",
+              flexGrow: 1,
+            }}
+          >
+            SMART SHOP
+          </Typography>
 
-      {user ? (
-        <>
-          <Link to="/cart">購物車</Link>
-          <Link to="/orders">我的訂單</Link>
-          <span>Hi, {user.username}</span>
-          <button onClick={logout}>登出</button>
-        </>
-      ) : (
-        <>
-          <Link to="/login">登入</Link>
-          <Link to="/register">註冊</Link>
-        </>
-      )}
-    </nav>
+          {/* 右側選單 */}
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+            <Button color="inherit" component={Link} to="/products">
+              所有商品
+            </Button>
+
+            {user ? (
+              <>
+                <IconButton color="inherit" component={Link} to="/cart">
+                  <Badge badgeContent={user.cartItemCount || 0} color="error">
+                    <ShoppingCartIcon />
+                  </Badge>
+                </IconButton>
+
+                <Button
+                  onClick={handleMenu}
+                  color="inherit"
+                  startIcon={<PersonIcon />}
+                  sx={{ textTransform: "none" }}
+                >
+                  {user.username}
+                </Button>
+
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleClose}
+                  sx={{ mt: 1 }}
+                >
+                  <MenuItem onClick={() => { handleClose(); navigate("/orders"); }}>
+                    我的訂單
+                  </MenuItem>
+                  {user.role === "ADMIN" && (
+                    <MenuItem onClick={() => { handleClose(); navigate("/admin/products"); }}>
+                      <SettingsIcon fontSize="small" sx={{ mr: 1 }} />
+                      後台管理
+                    </MenuItem>
+                  )}
+                  <MenuItem onClick={handleLogout}>
+                    <LogoutIcon fontSize="small" sx={{ mr: 1 }} />
+                    登出
+                  </MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <Button 
+                variant="outlined" 
+                color="inherit" 
+                component={Link} 
+                to="/login"
+                startIcon={<LoginIcon />}
+              >
+                登入 / 註冊
+              </Button>
+            )}
+          </Box>
+        </Toolbar>
+      </Container>
+    </AppBar>
   );
 }

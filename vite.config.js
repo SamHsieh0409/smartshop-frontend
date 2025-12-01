@@ -4,21 +4,14 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-
   server: {
-  proxy: {
-    "/auth": {
-      target: "http://localhost:8080",
-      changeOrigin: true,
-      secure: false,
-    },
-    "/products": {
-      target: "http://localhost:8080",
-      changeOrigin: true,
-      secure: false,
+    allowedHosts: ['.ngrok-free.app'],
+    proxy: {
+      //所有 /api 開頭的請求都轉給後端
+      "/api": {
+        target: "http://localhost:8080",
+        changeOrigin: true
+      }
     }
   }
-}
 })
-
-
