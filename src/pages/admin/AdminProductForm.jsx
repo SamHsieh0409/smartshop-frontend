@@ -15,8 +15,6 @@ import {
 } from "@mui/material";
 import { useNotify } from "../../context/NotificationContext";
 
-const CATEGORIES = ["文學小說", "心理成長", "商業理財", "電腦程式", "漫畫輕小說"];
-
 export default function AdminProductForm() {
   const { id } = useParams(); // 有 id 代表是編輯模式
   const navigate = useNavigate();
@@ -31,9 +29,22 @@ export default function AdminProductForm() {
     description: "",
     imageUrl: "",
   });
+  
+  const [categories, setCategories] = useState([]);
 
+  const fetchCategories = async () => {
+    try {
+      // 使用與 ProductList.jsx 相同的 API
+      const res = await axios.get("/products/categories"); 
+      setCategories(res.data.data || []);
+    } catch (err) {
+      notify.show("無法載入分類列表", "error");
+    }
+  };
   // 如果是編輯模式，先抓資料
   useEffect(() => {
+    fetchCategories();
+
     if (isEditMode) {
       axios.get(`/products/${id}`)
         .then((res) => {
@@ -90,7 +101,7 @@ export default function AdminProductForm() {
           <FormControl fullWidth>
             <InputLabel>分類</InputLabel>
             <Select name="category" value={formData.category} label="分類" onChange={handleChange}>
-              {CATEGORIES.map((c) => (
+              {categories.map((c) => (
                 <MenuItem key={c} value={c}>{c}</MenuItem>
               ))}
             </Select>

@@ -60,7 +60,6 @@ export default function ProductDetail() {
       </Button>
 
       <Paper elevation={3} sx={{ p: 4, borderRadius: 4 }}>
-        {/* ★ 關鍵修正 1：加入 alignItems="center" 讓左邊圖片與右邊文字垂直置中 */}
         <Grid container spacing={4} alignItems="center">
           
           {/* 左側圖片 */}
@@ -72,7 +71,7 @@ export default function ProductDetail() {
               sx={{
                 width: "100%",
                 height: 400,
-                objectFit: "contain", // ★ 改成 contain，保持書本比例
+                objectFit: "contain",
                 borderRadius: 2,
                 bgcolor: "#f9f9f9",
               }}
@@ -98,19 +97,14 @@ export default function ProductDetail() {
 
               <Divider sx={{ my: 2 }} />
 
-              {/* ★ 關鍵修正 2：
-                  1. 加入 width: "100%" 確保撐開寬度，讓 space-between 生效
-                  2. 加入按鈕美化樣式 (borderRadius, boxShadow)
-              */}
-              <Stack 
-                direction="row" 
-                alignItems="center" 
-                justifyContent="space-between"
-                sx={{ mt: 2, width: "100%" }} 
-              >
+              {/* ★ 改用 Box + flexGrow (彈簧) 強制推開 */}
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                 <Typography variant="body1" color="text.secondary">
                   庫存剩餘：<span style={{ fontWeight: "bold", color: "#333" }}>{product.stock}</span> 件
                 </Typography>
+
+                {/* 這是一個隱形彈簧，會佔滿中間所有空間 */}
+                <Box sx={{ flexGrow: 1 }} />
 
                 <Button
                   variant="contained"
@@ -119,16 +113,16 @@ export default function ProductDetail() {
                   onClick={handleAddToCart}
                   disabled={product.stock <= 0}
                   sx={{ 
-                    borderRadius: 8,       // 圓角按鈕
-                    px: 4,                 // 按鈕變寬
-                    textTransform: "none", // 取消全大寫
+                    borderRadius: 8,
+                    px: 4,
+                    textTransform: "none",
                     fontSize: "1rem",
                     boxShadow: 3
                   }}
                 >
-                  {product.stock > 0 ? "加入購物車" : "已售完"}
+                  {product.stock > 0 ? "放入購物車" : "已售完"}
                 </Button>
-              </Stack>
+              </Box>
 
             </Stack>
           </Grid>

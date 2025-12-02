@@ -5,7 +5,7 @@ import { Box, CircularProgress } from "@mui/material";
 export default function ProtectedRoute() {
   const { user, loading } = useAuth();
 
-  // 1. 等待後端確認登入狀態中... (這很重要，不然一重新整理就會被誤判踢出)
+  // 1. 等待後端確認登入狀態中...
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 10 }}>

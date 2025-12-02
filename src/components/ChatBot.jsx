@@ -17,7 +17,7 @@ import {
     Collapse,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
-import SmartToyIcon from "@mui/icons-material/SmartToy"; // 機器人圖示
+import SmartToyIcon from "@mui/icons-material/SmartToy";
 import CloseIcon from "@mui/icons-material/Close";
 import ChatIcon from "@mui/icons-material/Chat";
 import { useAuth } from "../context/AuthContext";
@@ -62,7 +62,7 @@ export default function ChatBot() {
             const aiMsg = {
                 sender: "ai",
                 text: reply,
-                products: products || [], // 如果有推薦商品
+                products: products || [],
             };
 
             setMessages((prev) => [...prev, aiMsg]);
@@ -190,7 +190,7 @@ export default function ChatBot() {
                     placeholder={user ? "請輸入問題..." : "請先登入才能對話"}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
+                    onKeyDown={handleKeyPress}
                     disabled={loading || !user} // 沒登入不能用
                 />
                 <IconButton color="primary" onClick={handleSend} disabled={loading || !user}>
