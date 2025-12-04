@@ -15,11 +15,13 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useNotify } from "../context/NotificationContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const notify = useNotify();
+  const { user, refreshUser } = useAuth();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,13 +38,25 @@ export default function ProductDetail() {
       .finally(() => setLoading(false));
   }, [id, navigate, notify]);
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = async (productId) => {
     try {
-      await axios.post("/cart/add", { productId: product.id, qty: 1 });
-      notify.show("已加入購物車！", "success");
+      await axios.post("/cart/add", { productId, qty: 1 });
+      notify.show("加入購物車成功", "success"); // 步驟 1: 確保成功通知發出
+
+      if (user) {
+        // 步驟 2: 將 refreshUser 放在獨立的 try/catch
+        try {
+          await refreshUser();
+        } catch (e) {
+          // 靜默處理 refresh 失敗，因為加入購物車本體是成功的
+          console.error("Failed to refresh user cart count:", e);
+        }
+      }
+
     } catch (err) {
+      // 只有當 axios.post("/cart/add") 失敗時，才會執行這裡
       if (err.response?.status === 401) {
-        notify.show("請先登入才能購買", "warning");
+        notify.show("請先登入！", "error");
         navigate("/login");
       } else {
         notify.show("加入失敗", "error");
@@ -61,7 +75,7 @@ export default function ProductDetail() {
 
       <Paper elevation={3} sx={{ p: 4, borderRadius: 4 }}>
         <Grid container spacing={4} alignItems="center">
-          
+
           {/* 左側圖片 */}
           <Grid item xs={12} md={6}>
             <Box
@@ -81,7 +95,7 @@ export default function ProductDetail() {
           <Grid item xs={12} md={6}>
             <Stack spacing={2}>
               <Chip label={product.category} color="primary" size="small" sx={{ width: "fit-content" }} />
-              
+
               <Typography variant="h4" fontWeight="bold">
                 {product.name}
               </Typography>
@@ -109,7 +123,7 @@ export default function ProductDetail() {
                   startIcon={<ShoppingCartIcon />}
                   onClick={handleAddToCart}
                   disabled={product.stock <= 0}
-                  sx={{ 
+                  sx={{
                     borderRadius: 8,
                     px: 4,
                     textTransform: "none",

@@ -159,8 +159,7 @@ export default function Orders() {
         open={paymentOpen} 
         maxWidth="xs" 
         fullWidth
-        PaperComponent={{ sx: { borderRadius: 4, p: 2 } }}
-      >
+        slotProps={{ paper: { sx: { borderRadius: 4, p: 2 } } }}      >
         <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
           {paymentStep === "processing" ? "付款處理中..." : "付款成功！"}
         </DialogTitle>

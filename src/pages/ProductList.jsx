@@ -28,10 +28,13 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import { useNotify } from "../context/NotificationContext";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import {refreshUser} from "../context/AuthContext";
 
 export default function ProductList() {
   const notify = useNotify();
   const navigate = useNavigate();
+  const { user, refreshUser } = useAuth();
 
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(1);
@@ -42,7 +45,7 @@ export default function ProductList() {
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState([]);
   const [sortBy, setSortBy] = useState("id");
-  const [direction, setDirection] = useState("asc");
+  const [direction] = useState("asc");
   const [loading, setLoading] = useState(false);
 
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -84,9 +87,9 @@ export default function ProductList() {
     try {
       // 先抓取前 20 筆 (或者更多)，然後在前端隨機挑 3 筆
       const res = await axios.get("/products/filter", {
-        params: { page: 0, size: 20 } 
+        params: { page: 0, size: 20 }
       });
-      
+
       const all = res.data.data?.content || [];
       if (all.length > 0) {
         // 隨機洗牌
@@ -116,8 +119,20 @@ export default function ProductList() {
   const handleAddToCart = async (productId) => {
     try {
       await axios.post("/cart/add", { productId, qty: 1 });
-      notify.show("加入購物車成功", "success");
+      notify.show("加入購物車成功", "success"); // 步驟 1: 確保成功通知發出
+
+      if (user) {
+        // 步驟 2: 將 refreshUser 放在獨立的 try/catch
+        try {
+          await refreshUser();
+        } catch (e) {
+          // 靜默處理 refresh 失敗，因為加入購物車本體是成功的
+          console.error("Failed to refresh user cart count:", e);
+        }
+      }
+
     } catch (err) {
+      // 只有當 axios.post("/cart/add") 失敗時，才會執行這裡
       if (err.response?.status === 401) {
         notify.show("請先登入！", "error");
         navigate("/login");
@@ -150,7 +165,7 @@ export default function ProductList() {
       </Box>
 
       <Container maxWidth="lg">
-        
+
         {/* 3. 店長推薦區塊 */}
         {featuredProducts.length > 0 && (
           <Box sx={{ mb: 6 }}>
@@ -160,7 +175,7 @@ export default function ProductList() {
                 店長強力推薦
               </Typography>
             </Stack>
-            
+
             <Grid container spacing={3}>
               {featuredProducts.map((p) => (
                 <Grid item xs={12} sm={6} md={4} key={p.id}>
@@ -179,19 +194,19 @@ export default function ProductList() {
                     onClick={() => navigate(`/product/${p.id}`)}
                   >
                     {/* 右上角紅色標籤 */}
-                    <Chip 
-                      label="HOT" 
-                      color="error" 
-                      size="small" 
+                    <Chip
+                      label="HOT"
+                      color="error"
+                      size="small"
                       icon={<AutoAwesomeIcon />}
-                      sx={{ 
-                        position: "absolute", 
-                        top: 12, 
-                        right: 12, 
-                        zIndex: 2, 
+                      sx={{
+                        position: "absolute",
+                        top: 12,
+                        right: 12,
+                        zIndex: 2,
                         fontWeight: "bold",
                         boxShadow: 2
-                      }} 
+                      }}
                     />
 
                     <Box sx={{ pt: 2, px: 2, textAlign: "center", bgcolor: "#fafafa" }}>
@@ -210,17 +225,17 @@ export default function ProductList() {
                       <Typography gutterBottom variant="subtitle2" color="text.secondary">
                         {p.category}
                       </Typography>
-                      <Typography variant="h6" component="div" sx={{ 
-                          overflow: "hidden", 
-                          textOverflow: "ellipsis", 
-                          display: "-webkit-box", 
-                          WebkitLineClamp: 2, 
-                          WebkitBoxOrient: "vertical",
-                          minHeight: 50
-                        }}>
+                      <Typography variant="h6" component="div" sx={{
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        minHeight: 50
+                      }}>
                         {p.name}
                       </Typography>
-                      
+
                       <Box sx={{ mt: "auto", pt: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <Typography variant="h6" color="primary" fontWeight="bold">
                           NT$ {p.price}
@@ -351,17 +366,17 @@ export default function ProductList() {
                     <Typography gutterBottom variant="subtitle2" color="text.secondary">
                       {p.category}
                     </Typography>
-                    <Typography variant="h6" component="div" sx={{ 
-                        overflow: "hidden", 
-                        textOverflow: "ellipsis", 
-                        display: "-webkit-box", 
-                        WebkitLineClamp: 2, 
-                        WebkitBoxOrient: "vertical",
-                        minHeight: 50
-                      }}>
+                    <Typography variant="h6" component="div" sx={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      minHeight: 50
+                    }}>
                       {p.name}
                     </Typography>
-                    
+
                     <Box sx={{ mt: "auto", pt: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Typography variant="h6" color="primary" fontWeight="bold">
                         NT$ {p.price}
@@ -394,7 +409,7 @@ export default function ProductList() {
             onChange={(_, value) => setPage(value)}
             color="primary"
             size="large"
-            showFirstButton 
+            showFirstButton
             showLastButton
           />
         </Box>

@@ -6,7 +6,7 @@ export function NotificationProvider({ children }) {
   const [notifications, setNotifications] = useState([]);
 
   const show = (message, type = "success") => {
-    const id = Date.now();
+    const id = Date.now().toString() + Math.random().toString(36).substring(2);
     setNotifications((prev) => [...prev, { id, message, type }]);
 
     setTimeout(() => {
@@ -34,7 +34,7 @@ export const useNotify = () => useContext(NotificationContext);
 const styles = {
   container: {
     position: "fixed",
-    top: "20px",
+    top: "80px",
     right: "20px",
     zIndex: 9999,
   },

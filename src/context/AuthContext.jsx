@@ -7,6 +7,15 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true); // 初次載入檢查登入狀態
 
+  const fetchUser = async () => {
+    try {
+        const res = await axios.get("/auth/me", { withCredentials: true });
+        setUser(res.data.data);
+    } catch (e) {
+        setUser(null);
+    }
+  };
+
   // App 啟動時，向後端查詢登入狀態
   useEffect(() => {
     axios.get("/auth/isLoggedIn", { withCredentials: true })
@@ -27,6 +36,8 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const refreshUser = fetchUser;
+  
   return (
     <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}

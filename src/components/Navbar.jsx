@@ -67,6 +67,9 @@ export default function Navbar() {
 
             {user ? (
               <>
+                <Button color="inherit" component={Link} to="/orders">
+                    我的訂單
+                </Button>
                 <IconButton color="inherit" component={Link} to="/cart">
                   <Badge badgeContent={user.cartItemCount || 0} color="error">
                     <ShoppingCartIcon />
@@ -88,9 +91,6 @@ export default function Navbar() {
                   onClose={handleClose}
                   sx={{ mt: 1 }}
                 >
-                  <MenuItem onClick={() => { handleClose(); navigate("/orders"); }}>
-                    我的訂單
-                  </MenuItem>
                   {user.role === "ADMIN" && (
                     <MenuItem onClick={() => { handleClose(); navigate("/admin/products"); }}>
                       <SettingsIcon fontSize="small" sx={{ mr: 1 }} />
