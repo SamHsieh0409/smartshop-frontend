@@ -38,25 +38,22 @@ export default function ProductDetail() {
       .finally(() => setLoading(false));
   }, [id, navigate, notify]);
 
-  const handleAddToCart = async (productId) => {
+  const handleAddToCart = async () => {
     try {
-      await axios.post("/cart/add", { productId, qty: 1 });
-      notify.show("加入購物車成功", "success"); // 步驟 1: 確保成功通知發出
+      await axios.post("/cart/add", { productId: product.id, qty: 1 });
+      notify.show("已加入購物車！", "success");
 
       if (user) {
-        // 步驟 2: 將 refreshUser 放在獨立的 try/catch
         try {
           await refreshUser();
         } catch (e) {
-          // 靜默處理 refresh 失敗，因為加入購物車本體是成功的
           console.error("Failed to refresh user cart count:", e);
         }
       }
 
     } catch (err) {
-      // 只有當 axios.post("/cart/add") 失敗時，才會執行這裡
       if (err.response?.status === 401) {
-        notify.show("請先登入！", "error");
+        notify.show("請先登入才能購買", "warning");
         navigate("/login");
       } else {
         notify.show("加入失敗", "error");

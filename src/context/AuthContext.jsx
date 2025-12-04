@@ -12,6 +12,7 @@ export function AuthProvider({ children }) {
         const res = await axios.get("/auth/me", { withCredentials: true });
         setUser(res.data.data);
     } catch (e) {
+        // 如果抓取使用者資料失敗（例如 Session 過期），則視為未登入
         setUser(null);
     }
   };
@@ -21,9 +22,8 @@ export function AuthProvider({ children }) {
     axios.get("/auth/isLoggedIn", { withCredentials: true })
       .then(res => {
         if (res.data.data) {
-          // 已登入 → 取得使用者資料
-          axios.get("/auth/me", { withCredentials: true })
-            .then(res2 => setUser(res2.data.data))
+          // 已登入 → 取得使用者資料，使用 fetchUser 函式
+          fetchUser();
         }
       })
       .finally(() => setLoading(false));
@@ -39,7 +39,7 @@ export function AuthProvider({ children }) {
   const refreshUser = fetchUser;
   
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -156,7 +156,7 @@ export default function ChatBot() {
                             <CardMedia
                               component="img"
                               sx={{ width: 60, height: 60, objectFit: "cover" }}
-                              image={p.imageUrl || "/public/images/book.jpg"}
+                              image={p.imageUrl || "/images/book.jpg"}
                               alt={p.name}
                             />
                             <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", p: 1 }}>

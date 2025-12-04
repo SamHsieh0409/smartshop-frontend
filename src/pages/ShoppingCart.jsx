@@ -23,10 +23,12 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import { useNotify } from "../context/NotificationContext";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function ShoppingCart() {
   const notify = useNotify();
   const navigate = useNavigate();
+  const { refreshUser } = useAuth(); 
   const [items, setItems] = useState([]);
 
   const fetchCart = async () => {
@@ -44,6 +46,7 @@ export default function ShoppingCart() {
     try {
       await axios.put(`/cart/update`, { productId, qty });
       fetchCart();
+      await refreshUser(); 
     } catch (err) {
       notify.show("更新失敗", "error");
     }
@@ -54,6 +57,7 @@ export default function ShoppingCart() {
       await axios.delete(`/cart/remove/${productId}`);
       fetchCart();
       notify.show("商品已移除", "warning");
+      await refreshUser(); 
     } catch (err) {
       notify.show("移除失敗", "error");
     }
@@ -63,6 +67,9 @@ export default function ShoppingCart() {
     try {
       await axios.post("/orders/checkout");
       notify.show("訂單建立成功！請前往付款", "success");
+      
+      await refreshUser(); 
+      
       navigate("/orders");
     } catch (err) {
       notify.show(err.response?.data?.message || "結帳失敗", "error");

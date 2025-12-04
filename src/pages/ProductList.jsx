@@ -29,11 +29,11 @@ import WhatshotIcon from '@mui/icons-material/Whatshot';
 import { useNotify } from "../context/NotificationContext";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import {refreshUser} from "../context/AuthContext";
 
 export default function ProductList() {
   const notify = useNotify();
   const navigate = useNavigate();
+
   const { user, refreshUser } = useAuth();
 
   const [products, setProducts] = useState([]);
@@ -119,20 +119,17 @@ export default function ProductList() {
   const handleAddToCart = async (productId) => {
     try {
       await axios.post("/cart/add", { productId, qty: 1 });
-      notify.show("加入購物車成功", "success"); // 步驟 1: 確保成功通知發出
+      notify.show("加入購物車成功", "success");
 
       if (user) {
-        // 步驟 2: 將 refreshUser 放在獨立的 try/catch
         try {
           await refreshUser();
         } catch (e) {
-          // 靜默處理 refresh 失敗，因為加入購物車本體是成功的
           console.error("Failed to refresh user cart count:", e);
         }
       }
 
     } catch (err) {
-      // 只有當 axios.post("/cart/add") 失敗時，才會執行這裡
       if (err.response?.status === 401) {
         notify.show("請先登入！", "error");
         navigate("/login");
@@ -377,7 +374,7 @@ export default function ProductList() {
                       {p.name}
                     </Typography>
 
-                    <Box sx={{ mt: "auto", pt: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <Box sx={{ mt: "auto", pt: 2, display: "flex", justifyContent:"space-between", alignItems:"center" }}>
                       <Typography variant="h6" color="primary" fontWeight="bold">
                         NT$ {p.price}
                       </Typography>
@@ -402,7 +399,7 @@ export default function ProductList() {
           </Grid>
         )}
 
-        <Box sx={{ mt: 5, display: "flex", justifyContent: "center" }}>
+        <Box sx={{ mt: 5, display: "flex", justifyContent:"center" }}>
           <Pagination
             count={totalPages}
             page={page}
