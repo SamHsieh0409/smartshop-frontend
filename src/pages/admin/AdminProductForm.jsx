@@ -16,7 +16,7 @@ import {
 import { useNotify } from "../../context/NotificationContext";
 
 export default function AdminProductForm() {
-  const { id } = useParams(); // 有 id 代表是編輯模式
+  const { id } = useParams();
   const navigate = useNavigate();
   const notify = useNotify();
   const isEditMode = !!id;
@@ -34,14 +34,12 @@ export default function AdminProductForm() {
 
   const fetchCategories = async () => {
     try {
-      // 使用與 ProductList.jsx 相同的 API
       const res = await axios.get("/products/categories"); 
       setCategories(res.data.data || []);
     } catch (err) {
       notify.show("無法載入分類列表", "error");
     }
   };
-  // 如果是編輯模式，先抓資料
   useEffect(() => {
     fetchCategories();
 
@@ -107,7 +105,7 @@ export default function AdminProductForm() {
             </Select>
           </FormControl>
 
-          <TextField label="圖片網址" name="imageUrl" value={formData.imageUrl} onChange={handleChange} fullWidth placeholder="https://..." />
+          <TextField label="圖片網址" name="imageUrl" value={formData.imageUrl} onChange={handleChange} />
           
           {/* 圖片預覽 */}
           {formData.imageUrl && (

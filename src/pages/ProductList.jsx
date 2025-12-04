@@ -79,7 +79,7 @@ export default function ProductList() {
     }
   };
 
-  // ★ 2. 隨機抓取 3 本推薦書
+  // 2. 隨機抓取 3 本推薦書
   const fetchFeatured = async () => {
     try {
       // 先抓取前 20 筆 (或者更多)，然後在前端隨機挑 3 筆
@@ -89,7 +89,7 @@ export default function ProductList() {
       
       const all = res.data.data?.content || [];
       if (all.length > 0) {
-        // 隨機洗牌演算法 (Fisher-Yates Shuffle)
+        // 隨機洗牌
         const shuffled = [...all].sort(() => 0.5 - Math.random());
         // 取前 3 個
         setFeaturedProducts(shuffled.slice(0, 3));
@@ -151,7 +151,7 @@ export default function ProductList() {
 
       <Container maxWidth="lg">
         
-        {/* ★ 3. 店長推薦區塊 (樣式修正：跟下方列表一致，只加標籤) */}
+        {/* 3. 店長推薦區塊 */}
         {featuredProducts.length > 0 && (
           <Box sx={{ mb: 6 }}>
             <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
@@ -173,14 +173,14 @@ export default function ProductList() {
                       "&:hover": { transform: "scale(1.02)", boxShadow: 6 },
                       borderRadius: 2,
                       cursor: "pointer",
-                      position: "relative", // 讓標籤可以定位
-                      overflow: "hidden"    // 避免標籤跑出去
+                      position: "relative",
+                      overflow: "hidden"
                     }}
                     onClick={() => navigate(`/product/${p.id}`)}
                   >
-                    {/* ★ 右上角紅色標籤 */}
+                    {/* 右上角紅色標籤 */}
                     <Chip 
-                      label="Featured" 
+                      label="HOT" 
                       color="error" 
                       size="small" 
                       icon={<AutoAwesomeIcon />}
@@ -248,7 +248,7 @@ export default function ProductList() {
           </Box>
         )}
 
-        {/* 一般商品列表 (保持不變) */}
+        {/* 一般商品列表 */}
         <Paper elevation={0} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={4}>

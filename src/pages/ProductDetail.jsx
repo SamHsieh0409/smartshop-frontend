@@ -66,7 +66,7 @@ export default function ProductDetail() {
           <Grid item xs={12} md={6}>
             <Box
               component="img"
-              src={product.imageUrl || `https://picsum.photos/500/500?random=${product.id}`}
+              src={product.imageUrl || `/images/book.jpg`}
               alt={product.name}
               sx={{
                 width: "100%",
@@ -78,7 +78,6 @@ export default function ProductDetail() {
             />
           </Grid>
 
-          {/* 右側資訊 */}
           <Grid item xs={12} md={6}>
             <Stack spacing={2}>
               <Chip label={product.category} color="primary" size="small" sx={{ width: "fit-content" }} />
@@ -97,13 +96,11 @@ export default function ProductDetail() {
 
               <Divider sx={{ my: 2 }} />
 
-              {/* ★ 改用 Box + flexGrow (彈簧) 強制推開 */}
               <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                 <Typography variant="body1" color="text.secondary">
                   庫存剩餘：<span style={{ fontWeight: "bold", color: "#333" }}>{product.stock}</span> 件
                 </Typography>
 
-                {/* 這是一個隱形彈簧，會佔滿中間所有空間 */}
                 <Box sx={{ flexGrow: 1 }} />
 
                 <Button

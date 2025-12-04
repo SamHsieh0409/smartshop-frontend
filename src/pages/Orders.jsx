@@ -22,9 +22,8 @@ export default function Orders() {
   const notify = useNotify();
   const [orders, setOrders] = useState([]);
   
-  // 控制模擬付款視窗
   const [paymentOpen, setPaymentOpen] = useState(false);
-  const [paymentStep, setPaymentStep] = useState("processing"); // processing | success
+  const [paymentStep, setPaymentStep] = useState("processing");
   const [currentOrderId, setCurrentOrderId] = useState(null);
 
   const fetchOrders = async () => {
@@ -55,7 +54,6 @@ export default function Orders() {
   const handlePaymentSuccess = async (orderId) => {
     try {
       // 呼叫後端「模擬付款 API」來真正更新資料庫狀態
-      // 注意：我們直接用之前寫給開發測試用的那個 API
       await axios.post(`/payments/test/pay/${orderId}`);
       
       setPaymentStep("success");
@@ -110,7 +108,6 @@ export default function Orders() {
 
                 <Divider sx={{ my: 2 }} />
 
-                {/* 訂單明細 */}
                 {order.items && order.items.map((item) => (
                   <Grid container key={item.productId} sx={{ mb: 1 }}>
                     <Grid item xs={8}>
@@ -162,7 +159,7 @@ export default function Orders() {
         open={paymentOpen} 
         maxWidth="xs" 
         fullWidth
-        PaperProps={{ sx: { borderRadius: 4, p: 2 } }}
+        PaperComponent={{ sx: { borderRadius: 4, p: 2 } }}
       >
         <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
           {paymentStep === "processing" ? "付款處理中..." : "付款成功！"}
